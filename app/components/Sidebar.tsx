@@ -9,13 +9,16 @@ export default function Sidebar() {
   const navItems = [
     { href: '/', label: 'Dashboard', icon: '📊' },
     { href: '/leads', label: 'Leads', icon: '👥' },
+    { href: '/customers', label: 'Customers', icon: '🏢' },
+    { href: '/campaigns', label: 'Campaigns', icon: '📰' },
+    { href: '/advertisements', label: 'Advertisements', icon: '📢' },
+    { href: '/reports', label: 'Reports', icon: '📈' },
   ];
 
   return (
     <aside className="w-64 bg-gray-900 text-white min-h-screen p-6">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-blue-400">CRM Admin</h1>
-        <p className="text-gray-400 text-sm mt-1">Interactive Prototype</p>
       </div>
       
       <nav className="space-y-2">

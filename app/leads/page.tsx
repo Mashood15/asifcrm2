@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import AddLeadModal, { NewLead } from './AddLeadModal';
+import FollowUpModal from './FollowUpModal';
 
 interface Lead {
   id: number;
@@ -15,10 +16,20 @@ interface Lead {
   createdAt: string;
 }
 
+interface FollowUp {
+  id: number;
+  date: string;
+  type: 'Call' | 'Email' | 'Meeting' | 'Note';
+  description: string;
+  outcome: string;
+}
+
 export default function LeadsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false);
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
 
   const [leads, setLeads] = useState<Lead[]>([
     {
@@ -118,6 +129,31 @@ export default function LeadsPage() {
       createdAt: new Date().toISOString().split('T')[0],
     };
     setLeads([lead, ...leads]);
+  };
+
+  // Sample follow-up data (in real app, this would come from backend)
+  const getFollowUpsForLead = (leadId: number): FollowUp[] => {
+    const followUpData: Record<number, FollowUp[]> = {
+      1: [
+        { id: 1, date: '2024-12-08', type: 'Email', description: 'Sent initial introduction email with product information', outcome: 'Lead opened email and expressed interest' },
+        { id: 2, date: '2024-12-07', type: 'Call', description: 'Follow-up call to discuss pricing', outcome: 'Scheduled demo for next week' },
+      ],
+      2: [
+        { id: 3, date: '2024-12-07', type: 'Call', description: 'Initial discovery call', outcome: 'Identified key pain points and needs' },
+        { id: 4, date: '2024-12-05', type: 'Meeting', description: 'Product demo meeting', outcome: 'Very positive response, discussing next steps' },
+        { id: 5, date: '2024-12-03', type: 'Email', description: 'Sent proposal document', outcome: 'Awaiting feedback' },
+      ],
+      3: [
+        { id: 6, date: '2024-12-06', type: 'Meeting', description: 'Qualification meeting with decision makers', outcome: 'Budget confirmed, moving to proposal stage' },
+        { id: 7, date: '2024-12-04', type: 'Note', description: 'Research on company background and competitors', outcome: 'Identified unique value proposition' },
+      ],
+    };
+    return followUpData[leadId] || [];
+  };
+
+  const handleShowFollowUp = (lead: Lead) => {
+    setSelectedLead(lead);
+    setIsFollowUpModalOpen(true);
   };
 
   const statuses = ['All', 'New', 'Contacted', 'Qualified', 'Proposal', 'Won', 'Lost'];
@@ -245,6 +281,9 @@ export default function LeadsPage() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Created
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -280,6 +319,17 @@ export default function LeadsPage() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-600">{lead.createdAt}</div>
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <button
+                      onClick={() => handleShowFollowUp(lead)}
+                      className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium"
+                    >
+                      <svg className="w-4 h-4" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                      </svg>
+                      Follow-up
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -309,6 +359,16 @@ export default function LeadsPage() {
         onClose={() => setIsModalOpen(false)}
         onAddLead={handleAddLead}
       />
+
+      {/* Follow-up Modal */}
+      {selectedLead && (
+        <FollowUpModal
+          isOpen={isFollowUpModalOpen}
+          onClose={() => setIsFollowUpModalOpen(false)}
+          leadName={selectedLead.name}
+          followUps={getFollowUpsForLead(selectedLead.id)}
+        />
+      )}
     </div>
   );
 }
